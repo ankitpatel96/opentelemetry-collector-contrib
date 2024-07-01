@@ -8,19 +8,23 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
+	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/sketches-go/ddsketch"
+	"google.golang.org/protobuf/proto"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -364,4 +368,19 @@ func testSketchBytes(nums ...float64) []byte {
 		panic(err)
 	}
 	return buf
+}
+
+func GenerateHTTPLogItem(start int, count int) *[]datadogV2.HTTPLogItem {
+	res := make([]datadogV2.HTTPLogItem, 0, count)
+	for i := start; i <= start+count; i++ {
+		item := datadogV2.HTTPLogItem{
+			Ddsource: datadog.PtrString("golang"),
+			Ddtags:   datadog.PtrString("tag1:true"),
+			Hostname: datadog.PtrString("hostname"),
+			Message:  fmt.Sprintf("%d", i),
+			Service:  datadog.PtrString("server"),
+		}
+		res = append(res, item)
+	}
+	return &res
 }

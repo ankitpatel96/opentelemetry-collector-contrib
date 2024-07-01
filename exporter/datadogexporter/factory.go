@@ -20,20 +20,22 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
+
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/config/confignet"
 	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/exporter/exporterbatcher"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/internal/hostmetadata"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/internal/metadata"
@@ -538,13 +540,47 @@ func (f *factory) createLogsExporter(
 		}
 		logsAgent = la
 		pusher = exp.ConsumeLogs
+		return exporterhelper.NewLogsExporter(
+			ctx,
+			set,
+			cfg,
+			pusher,
+			// explicitly disable since we rely on http.Client timeout logic.
+			exporterhelper.WithTimeout(exporterhelper.TimeoutSettings{Timeout: 0 * time.Second}),
+			exporterhelper.WithRetry(cfg.BackOffConfig),
+			exporterhelper.WithQueue(cfg.QueueSettings),
+			exporterhelper.WithShutdown(func(context.Context) error {
+				cancel()
+				f.StopReporter()
+				if logsAgent != nil {
+					return logsAgent.Stop(ctx)
+				}
+				return nil
+			}),
+			exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
+		)
 	default:
 		exp, err := newLogsExporter(ctx, set, cfg, &f.onceMetadata, attributesTranslator, hostProvider, metadataReporter)
 		if err != nil {
 			cancel()
 			return nil, err
 		}
-		pusher = exp.consumeLogs
+		return exporterhelper.NewLogsRequestExporter(ctx,
+			set,
+			exp.NewLogsRequest,
+			exporterhelper.WithTimeout(exporterhelper.TimeoutSettings{Timeout: 0 * time.Second}),
+			exporterhelper.WithRetry(cfg.BackOffConfig),
+			exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig(),
+				exporterhelper.WithRequestBatchFuncs(
+					mergeLogs,
+					mergeSplitLogs)),
+			exporterhelper.WithQueue(cfg.QueueSettings),
+			exporterhelper.WithShutdown(func(context.Context) error {
+				cancel()
+				f.StopReporter()
+				return nil
+			}),
+		)
 	}
 	return exporterhelper.NewLogsExporter(
 		ctx,
@@ -563,5 +599,6 @@ func (f *factory) createLogsExporter(
 			}
 			return nil
 		}),
+		exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
 	)
 }

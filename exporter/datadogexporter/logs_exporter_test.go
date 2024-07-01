@@ -14,7 +14,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"go.opentelemetry.io/collector/config/confignet"
+	"go.opentelemetry.io/collector/exporter/exporterbatcher"
+	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/exporter/exportertest"
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -25,6 +28,121 @@ import (
 )
 
 const timeFormatString = "2006-01-02T15:04:05.000Z07:00"
+
+func TestMergeSplitLogs(t *testing.T) {
+	tests := []struct {
+		name     string
+		cfg      exporterbatcher.MaxSizeConfig
+		lr1      exporterhelper.Request
+		lr2      exporterhelper.Request
+		expected []*logsRequest
+	}{
+		{
+			name:     "both_requests_empty",
+			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+			lr1:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
+			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
+			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil}},
+		},
+		{
+			name:     "both_requests_nil",
+			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+			lr1:      nil,
+			lr2:      nil,
+			expected: []*logsRequest{},
+		},
+		{
+			name: "first_request_empty",
+			cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+			lr1: &logsRequest{
+				Ld: testutil.GenerateHTTPLogItem(0, 0),
+			},
+			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 5)},
+			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 5)}},
+		},
+		//{
+		//	name:     "first_requests_nil",
+		//	cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+		//	lr1:      nil,
+		//	lr2:      &logsRequest{Ld: testdata.GenerateLogs(5)},
+		//	expected: []*logsRequest{{Ld: testdata.GenerateLogs(5)}},
+		//},
+		//{
+		//	name:     "first_nil_second_empty",
+		//	cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+		//	lr1:      nil,
+		//	lr2:      &logsRequest{Ld: plog.NewLogs()},
+		//	expected: []*logsRequest{{Ld: plog.NewLogs()}},
+		//},
+		//{
+		//	name: "merge_only",
+		//	cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+		//	lr1:  &logsRequest{Ld: testdata.GenerateLogs(4)},
+		//	lr2:  &logsRequest{Ld: testdata.GenerateLogs(6)},
+		//	expected: []*logsRequest{{Ld: func() plog.Logs {
+		//		logs := testdata.GenerateLogs(4)
+		//		testdata.GenerateLogs(6).ResourceLogs().MoveAndAppendTo(logs.ResourceLogs())
+		//		return logs
+		//	}()}},
+		//},
+		//{
+		//	name: "split_only",
+		//	cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 4},
+		//	lr1:  nil,
+		//	lr2:  &logsRequest{Ld: testdata.GenerateLogs(10)},
+		//	expected: []*logsRequest{
+		//		{Ld: testdata.GenerateLogs(4)},
+		//		{Ld: testdata.GenerateLogs(4)},
+		//		{Ld: testdata.GenerateLogs(2)},
+		//	},
+		//},
+		//{
+		//	name: "merge_and_split",
+		//	cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+		//	lr1:  &logsRequest{Ld: testdata.GenerateLogs(8)},
+		//	lr2:  &logsRequest{Ld: testdata.GenerateLogs(20)},
+		//	expected: []*logsRequest{
+		//		{Ld: func() plog.Logs {
+		//			logs := testdata.GenerateLogs(8)
+		//			testdata.GenerateLogs(2).ResourceLogs().MoveAndAppendTo(logs.ResourceLogs())
+		//			return logs
+		//		}()},
+		//		{Ld: testdata.GenerateLogs(10)},
+		//		{Ld: testdata.GenerateLogs(8)},
+		//	},
+		//},
+		//{
+		//	name: "scope_logs_split",
+		//	cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 4},
+		//	lr1: &logsRequest{Ld: func() plog.Logs {
+		//		Ld := testdata.GenerateLogs(4)
+		//		Ld.ResourceLogs().At(0).ScopeLogs().AppendEmpty().LogRecords().AppendEmpty().Body().SetStr("extra log")
+		//		return Ld
+		//	}()},
+		//	lr2: &logsRequest{Ld: testdata.GenerateLogs(2)},
+		//	expected: []*logsRequest{
+		//		{Ld: testdata.GenerateLogs(4)},
+		//		{Ld: func() plog.Logs {
+		//			Ld := testdata.GenerateLogs(0)
+		//			Ld.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().AppendEmpty().Body().SetStr("extra log")
+		//			testdata.GenerateLogs(2).ResourceLogs().MoveAndAppendTo(Ld.ResourceLogs())
+		//			return Ld
+		//		}()},
+		//	},
+		//},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := mergeSplitLogs(context.Background(), tt.cfg, tt.lr1, tt.lr2)
+			assert.Nil(t, err)
+			assert.Equal(t, len(tt.expected), len(res))
+			for i, r := range res {
+				assert.Equal(t, tt.expected[i], r.(*logsRequest))
+			}
+		})
+
+	}
+}
 
 func TestLogsExporter(t *testing.T) {
 	lr := testdata.GenerateLogsOneLogRecord()

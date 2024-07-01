@@ -4,6 +4,7 @@
 package testutil // import "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/internal/testutil"
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -50,4 +51,22 @@ func TestNewGaugeMetrics(t *testing.T) {
 	require.EqualValues(t, all.At(1).Gauge().DataPoints().At(1).Attributes().AsRaw(), map[string]any{
 		"w": "n",
 	})
+}
+
+func TestGenerateHTTPLogItem(t *testing.T) {
+	logz := GenerateHTTPLogItem(0, 10)
+	for i, log := range *logz {
+		msgInt, err := strconv.Atoi(log.Message)
+		require.NoError(t, err)
+		require.Equal(t, i, msgInt)
+	}
+	logz = GenerateHTTPLogItem(5, 10)
+	for i, log := range *logz {
+		msgInt, err := strconv.Atoi(log.Message)
+		require.NoError(t, err)
+		require.Equal(t, i+5, msgInt)
+	}
+	lastMsgInt, err := strconv.Atoi((*logz)[9].Message)
+	require.NoError(t, err)
+	require.Equal(t, 14, lastMsgInt)
 }
