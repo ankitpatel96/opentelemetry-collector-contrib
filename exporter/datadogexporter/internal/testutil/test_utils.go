@@ -372,7 +372,7 @@ func testSketchBytes(nums ...float64) []byte {
 
 func GenerateHTTPLogItem(start int, count int) *[]datadogV2.HTTPLogItem {
 	res := make([]datadogV2.HTTPLogItem, 0, count)
-	for i := start; i <= start+count; i++ {
+	for i := start; i < start+count; i++ {
 		item := datadogV2.HTTPLogItem{
 			Ddsource: datadog.PtrString("golang"),
 			Ddtags:   datadog.PtrString("tag1:true"),

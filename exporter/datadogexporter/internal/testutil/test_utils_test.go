@@ -55,11 +55,14 @@ func TestNewGaugeMetrics(t *testing.T) {
 
 func TestGenerateHTTPLogItem(t *testing.T) {
 	logz := GenerateHTTPLogItem(0, 10)
+	require.Equal(t, 10, len(*logz))
 	for i, log := range *logz {
 		msgInt, err := strconv.Atoi(log.Message)
 		require.NoError(t, err)
 		require.Equal(t, i, msgInt)
 	}
+	logz = GenerateHTTPLogItem(5, 0)
+	require.Equal(t, 0, len(*logz))
 	logz = GenerateHTTPLogItem(5, 10)
 	for i, log := range *logz {
 		msgInt, err := strconv.Atoi(log.Message)
