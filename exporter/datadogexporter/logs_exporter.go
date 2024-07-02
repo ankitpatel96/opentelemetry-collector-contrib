@@ -82,10 +82,11 @@ func mergeSplitLogs(_ context.Context, cfg exporterbatcher.MaxSizeConfig, r1, r2
 
 		for {
 			if len(*srcReq.Ld) == 0 {
-				continue
+				break
 			}
 			extractCount := min(len(*srcReq.Ld), capacityLeft)
 			extractedLogs := (*srcReq.Ld)[:extractCount]
+			*srcReq.Ld = (*srcReq.Ld)[extractCount:]
 			capacityLeft = capacityLeft - extractCount
 			if destReq == nil {
 				destReq = &logsRequest{Ld: &extractedLogs, Sender: srcReq.Sender}
