@@ -73,7 +73,7 @@ func mergeSplitLogs(_ context.Context, cfg exporterbatcher.MaxSizeConfig, r1, r2
 			if destReq == nil {
 				destReq = srcReq
 			} else {
-				*destReq.Ld = append(*srcReq.Ld, *destReq.Ld...)
+				*destReq.Ld = append(*destReq.Ld, *srcReq.Ld...)
 				srcReq.Ld = nil
 			}
 			capacityLeft -= len(*destReq.Ld)
