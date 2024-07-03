@@ -44,8 +44,8 @@ type logsRequest struct {
 }
 
 func mergeLogs(_ context.Context, r1 exporterhelper.Request, r2 exporterhelper.Request) (exporterhelper.Request, error) {
-	lr1, ok1 := r1.(*logsRequest)
-	lr2, ok2 := r2.(*logsRequest)
+	lr1, ok1 := r1.(logsRequest)
+	lr2, ok2 := r2.(logsRequest)
 	if !ok1 || !ok2 {
 		return nil, errors.New("invalid input type")
 	}
@@ -57,7 +57,7 @@ func mergeLogs(_ context.Context, r1 exporterhelper.Request, r2 exporterhelper.R
 func mergeSplitLogs(_ context.Context, cfg exporterbatcher.MaxSizeConfig, r1, r2 exporterhelper.Request) ([]exporterhelper.Request, error) {
 	var (
 		res          []exporterhelper.Request
-		destReq      *logsRequest
+		destReq      logsRequest
 		capacityLeft = cfg.MaxSizeItems
 	)
 	// iterate through the input requests (optional)
@@ -65,12 +65,12 @@ func mergeSplitLogs(_ context.Context, cfg exporterbatcher.MaxSizeConfig, r1, r2
 		if req == nil {
 			continue
 		}
-		srcReq, ok := req.(*logsRequest)
+		srcReq, ok := req.(logsRequest)
 		if !ok {
 			return nil, errors.New("invalid input type")
 		}
 		if len(*srcReq.Ld) <= capacityLeft {
-			if destReq == nil {
+			if destReq.Ld == nil {
 				destReq = srcReq
 			} else {
 				*destReq.Ld = append(*destReq.Ld, *srcReq.Ld...)
@@ -88,21 +88,21 @@ func mergeSplitLogs(_ context.Context, cfg exporterbatcher.MaxSizeConfig, r1, r2
 			extractedLogs := (*srcReq.Ld)[:extractCount]
 			*srcReq.Ld = (*srcReq.Ld)[extractCount:]
 			capacityLeft = capacityLeft - extractCount
-			if destReq == nil {
-				destReq = &logsRequest{Ld: &extractedLogs, Sender: srcReq.Sender}
+			if destReq.Ld == nil {
+				destReq = logsRequest{Ld: &extractedLogs, Sender: srcReq.Sender}
 			} else {
 				*destReq.Ld = append(*destReq.Ld, extractedLogs...)
 			}
 			// Create new batch once capacity is reached.
 			if capacityLeft == 0 {
 				res = append(res, destReq)
-				destReq = nil
+				destReq = logsRequest{}
 				capacityLeft = cfg.MaxSizeItems
 			}
 		}
 	}
 
-	if destReq != nil {
+	if destReq.Ld != nil {
 		res = append(res, destReq)
 	}
 	return res, nil

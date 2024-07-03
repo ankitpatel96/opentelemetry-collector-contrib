@@ -557,7 +557,7 @@ func (f *factory) createLogsExporter(
 				}
 				return nil
 			}),
-			exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
+			//exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
 		)
 	default:
 		exp, err := newLogsExporter(ctx, set, cfg, &f.onceMetadata, attributesTranslator, hostProvider, metadataReporter)
@@ -600,6 +600,6 @@ func (f *factory) createLogsExporter(
 			}
 			return nil
 		}),
-		exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
+		//exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
 	)
 }

@@ -37,58 +37,58 @@ func TestMergeSplitLogs(t *testing.T) {
 		cfg      exporterbatcher.MaxSizeConfig
 		lr1      exporterhelper.Request
 		lr2      exporterhelper.Request
-		expected []*logsRequest
+		expected []logsRequest
 	}{
 		{
 			name:     "both_requests_empty",
 			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
-			lr1:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
-			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
-			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil}},
+			lr1:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
+			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
+			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil}},
 		},
 		{
 			name:     "both_requests_nil",
 			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
 			lr1:      nil,
 			lr2:      nil,
-			expected: []*logsRequest{},
+			expected: []logsRequest{},
 		},
 		{
 			name: "first_request_empty",
 			cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
-			lr1: &logsRequest{
+			lr1: logsRequest{
 				Ld: testutil.GenerateHTTPLogItem(0, 0),
 			},
-			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 5)},
-			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 5)}},
+			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 5)},
+			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 5)}},
 		},
 		{
 			name:     "first_requests_nil",
 			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
 			lr1:      nil,
-			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 5)},
-			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 5)}},
+			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 5)},
+			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 5)}},
 		},
 		{
 			name:     "first_nil_second_empty",
 			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
 			lr1:      nil,
-			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0)},
-			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0)}},
+			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0)},
+			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0)}},
 		},
 		{
 			name:     "merge_only",
 			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
-			lr1:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 4)},
-			lr2:      &logsRequest{Ld: testutil.GenerateHTTPLogItem(4, 4)},
-			expected: []*logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 8)}},
+			lr1:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 4)},
+			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(4, 4)},
+			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 8)}},
 		},
 		{
 			name: "split_only",
 			cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 4},
 			lr1:  nil,
-			lr2:  &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 10)},
-			expected: []*logsRequest{
+			lr2:  logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 10)},
+			expected: []logsRequest{
 				{Ld: testutil.GenerateHTTPLogItem(0, 4)},
 				{Ld: testutil.GenerateHTTPLogItem(4, 4)},
 				{Ld: testutil.GenerateHTTPLogItem(8, 2)},
@@ -97,9 +97,9 @@ func TestMergeSplitLogs(t *testing.T) {
 		{
 			name: "merge_and_split",
 			cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
-			lr1:  &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 8)},
-			lr2:  &logsRequest{Ld: testutil.GenerateHTTPLogItem(8, 20)},
-			expected: []*logsRequest{
+			lr1:  logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 8)},
+			lr2:  logsRequest{Ld: testutil.GenerateHTTPLogItem(8, 20)},
+			expected: []logsRequest{
 				{Ld: testutil.GenerateHTTPLogItem(0, 10)},
 				{Ld: testutil.GenerateHTTPLogItem(10, 10)},
 				{Ld: testutil.GenerateHTTPLogItem(20, 8)},
@@ -112,7 +112,7 @@ func TestMergeSplitLogs(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, len(tt.expected), len(res))
 			for i, r := range res {
-				if diff := cmp.Diff(tt.expected[i], r.(*logsRequest)); diff != "" {
+				if diff := cmp.Diff(tt.expected[i], r.(logsRequest)); diff != "" {
 					t.Error(diff)
 				}
 			}
