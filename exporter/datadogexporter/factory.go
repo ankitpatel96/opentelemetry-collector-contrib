@@ -573,8 +573,9 @@ func (f *factory) createLogsExporter(
 			exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig(),
 				exporterhelper.WithRequestBatchFuncs(
 					mergeLogs,
-					mergeSplitLogs)),
-			exporterhelper.WithQueue(cfg.QueueSettings),
+					mergeSplitLogs),
+			),
+			// no queueing
 			exporterhelper.WithShutdown(func(context.Context) error {
 				cancel()
 				f.StopReporter()

@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config/confignet"
 	"go.opentelemetry.io/collector/exporter/exporterbatcher"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
@@ -93,40 +94,17 @@ func TestMergeSplitLogs(t *testing.T) {
 				{Ld: testutil.GenerateHTTPLogItem(8, 2)},
 			},
 		},
-		//{
-		//	name: "merge_and_split",
-		//	cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
-		//	lr1:  &logsRequest{Ld: testdata.GenerateLogs(8)},
-		//	lr2:  &logsRequest{Ld: testdata.GenerateLogs(20)},
-		//	expected: []*logsRequest{
-		//		{Ld: func() plog.Logs {
-		//			logs := testdata.GenerateLogs(8)
-		//			testdata.GenerateLogs(2).ResourceLogs().MoveAndAppendTo(logs.ResourceLogs())
-		//			return logs
-		//		}()},
-		//		{Ld: testdata.GenerateLogs(10)},
-		//		{Ld: testdata.GenerateLogs(8)},
-		//	},
-		//},
-		//{
-		//	name: "scope_logs_split",
-		//	cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 4},
-		//	lr1: &logsRequest{Ld: func() plog.Logs {
-		//		Ld := testdata.GenerateLogs(4)
-		//		Ld.ResourceLogs().At(0).ScopeLogs().AppendEmpty().LogRecords().AppendEmpty().Body().SetStr("extra log")
-		//		return Ld
-		//	}()},
-		//	lr2: &logsRequest{Ld: testdata.GenerateLogs(2)},
-		//	expected: []*logsRequest{
-		//		{Ld: testdata.GenerateLogs(4)},
-		//		{Ld: func() plog.Logs {
-		//			Ld := testdata.GenerateLogs(0)
-		//			Ld.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().AppendEmpty().Body().SetStr("extra log")
-		//			testdata.GenerateLogs(2).ResourceLogs().MoveAndAppendTo(Ld.ResourceLogs())
-		//			return Ld
-		//		}()},
-		//	},
-		//},
+		{
+			name: "merge_and_split",
+			cfg:  exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
+			lr1:  &logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 8)},
+			lr2:  &logsRequest{Ld: testutil.GenerateHTTPLogItem(8, 20)},
+			expected: []*logsRequest{
+				{Ld: testutil.GenerateHTTPLogItem(0, 10)},
+				{Ld: testutil.GenerateHTTPLogItem(10, 10)},
+				{Ld: testutil.GenerateHTTPLogItem(20, 8)},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -350,6 +328,8 @@ func TestLogsExporter(t *testing.T) {
 			f := NewFactory()
 			ctx := context.Background()
 			exp, err := f.CreateLogsExporter(ctx, params, cfg)
+			require.NoError(t, err)
+			err = exp.Start(context.Background(), componenttest.NewNopHost())
 			require.NoError(t, err)
 			require.NoError(t, exp.ConsumeLogs(ctx, tt.args.ld))
 			assert.Equal(t, tt.want, server.LogsData)
@@ -676,6 +656,8 @@ func TestLogsAgentExporter(t *testing.T) {
 			f := NewFactory()
 			ctx := context.Background()
 			exp, err := f.CreateLogsExporter(ctx, params, cfg)
+			require.NoError(t, err)
+			err = exp.Start(context.Background(), componenttest.NewNopHost())
 			require.NoError(t, err)
 			require.NoError(t, exp.ConsumeLogs(ctx, tt.args.ld))
 
