@@ -557,7 +557,6 @@ func (f *factory) createLogsExporter(
 				}
 				return nil
 			}),
-			//exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
 		)
 	default:
 		exp, err := newLogsExporter(ctx, set, cfg, &f.onceMetadata, attributesTranslator, hostProvider, metadataReporter)
@@ -583,23 +582,7 @@ func (f *factory) createLogsExporter(
 			}),
 		)
 	}
-	return exporterhelper.NewLogsExporter(
-		ctx,
-		set,
-		cfg,
-		pusher,
-		// explicitly disable since we rely on http.Client timeout logic.
-		exporterhelper.WithTimeout(exporterhelper.TimeoutSettings{Timeout: 0 * time.Second}),
-		exporterhelper.WithRetry(cfg.BackOffConfig),
-		exporterhelper.WithQueue(cfg.QueueSettings),
-		exporterhelper.WithShutdown(func(context.Context) error {
-			cancel()
-			f.StopReporter()
-			if logsAgent != nil {
-				return logsAgent.Stop(ctx)
-			}
-			return nil
-		}),
-		//exporterhelper.WithBatcher(exporterbatcher.NewDefaultConfig()),
-	)
+	// unreachable
+	cancel()
+	return nil, nil
 }
