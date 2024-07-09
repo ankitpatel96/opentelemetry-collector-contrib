@@ -31,6 +31,7 @@ import (
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterbatcher"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"go.opentelemetry.io/collector/exporter/exporterqueue"
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -574,7 +575,7 @@ func (f *factory) createLogsExporter(
 					mergeLogs,
 					mergeSplitLogs),
 			),
-			// no queueing
+			exporterhelper.WithRequestQueue(exporterqueue.NewDefaultConfig(), exporterqueue.NewMemoryQueueFactory[exporterhelper.Request]()),
 			exporterhelper.WithShutdown(func(context.Context) error {
 				cancel()
 				f.StopReporter()

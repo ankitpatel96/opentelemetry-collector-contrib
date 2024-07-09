@@ -332,7 +332,9 @@ func TestLogsExporter(t *testing.T) {
 			err = exp.Start(context.Background(), componenttest.NewNopHost())
 			require.NoError(t, err)
 			require.NoError(t, exp.ConsumeLogs(ctx, tt.args.ld))
-			assert.Equal(t, tt.want, server.LogsData)
+			assert.Eventually(t, func() bool {
+				return cmp.Equal(tt.want, server.LogsData)
+			}, 1*time.Second, 10*time.Millisecond)
 		})
 	}
 }
