@@ -42,9 +42,9 @@ func TestMergeSplitLogs(t *testing.T) {
 		{
 			name:     "both_requests_empty",
 			cfg:      exporterbatcher.MaxSizeConfig{MaxSizeItems: 10},
-			lr1:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
-			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil},
-			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0), Sender: nil}},
+			lr1:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0)},
+			lr2:      logsRequest{Ld: testutil.GenerateHTTPLogItem(0, 0)},
+			expected: []logsRequest{{Ld: testutil.GenerateHTTPLogItem(0, 0)}},
 		},
 		{
 			name:     "both_requests_nil",

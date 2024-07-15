@@ -39,8 +39,7 @@ const (
 )
 
 type logsRequest struct {
-	Sender *logs.Sender
-	Ld     *[]datadogV2.HTTPLogItem
+	Ld *[]datadogV2.HTTPLogItem
 }
 
 func mergeLogs(_ context.Context, r1 exporterhelper.Request, r2 exporterhelper.Request) (exporterhelper.Request, error) {
@@ -89,7 +88,7 @@ func mergeSplitLogs(_ context.Context, cfg exporterbatcher.MaxSizeConfig, r1, r2
 			*srcReq.Ld = (*srcReq.Ld)[extractCount:]
 			capacityLeft = capacityLeft - extractCount
 			if destReq.Ld == nil {
-				destReq = logsRequest{Ld: &extractedLogs, Sender: srcReq.Sender}
+				destReq = logsRequest{Ld: &extractedLogs}
 			} else {
 				*destReq.Ld = append(*destReq.Ld, extractedLogs...)
 			}
@@ -112,17 +111,12 @@ func (l logsRequest) ItemsCount() int {
 	return len(*l.Ld)
 }
 
-func (l logsRequest) Export(ctx context.Context) error {
-	return l.Sender.SubmitLogs(ctx, *l.Ld)
-}
-
 func (exp *logsExporter) NewLogsRequest(ctx context.Context, ld plog.Logs) (exporterhelper.Request, error) {
 	var err error
 	defer func() { err = exp.scrubber.Scrub(err) }()
 	logz := exp.translator.MapLogs(ctx, ld)
 	lr := logsRequest{
-		Sender: exp.sender,
-		Ld:     &logz,
+		Ld: &logz,
 	}
 	if exp.cfg.HostMetadata.Enabled {
 		// start host metadata with resource attributes from
@@ -155,6 +149,15 @@ type logsExporter struct {
 	onceMetadata     *sync.Once
 	sourceProvider   source.Provider
 	metadataReporter *inframetadata.Reporter
+}
+
+func (le *logsExporter) Export(ctx context.Context, data exporterhelper.Request) error {
+
+	lr1, ok1 := data.(logsRequest)
+	if !ok1 {
+		return errors.New("somethings very wrong")
+	}
+	return le.sender.SubmitLogs(ctx, *lr1.Ld)
 }
 
 // newLogsExporter creates a new instance of logsExporter
