@@ -14,10 +14,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/config/configtelemetry"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/processor"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.uber.org/zap/zaptest"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
@@ -30,6 +33,9 @@ func newTestTransformer(t *testing.T) *transformer {
 	trans, err := newTransformer(context.Background(), newDefaultConfiguration(), processor.Settings{
 		TelemetrySettings: component.TelemetrySettings{
 			Logger: zaptest.NewLogger(t),
+			LeveledMeterProvider: func(_ configtelemetry.Level) metric.MeterProvider {
+				return noop.MeterProvider{}
+			},
 		},
 	})
 	require.NoError(t, err, "Must not error when creating default transformer")
