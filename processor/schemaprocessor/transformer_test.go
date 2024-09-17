@@ -252,7 +252,7 @@ const (
 )
 
 // returns a test log with no schema versions set
-func GenerateLogForTest() plog.Logs {
+func generateLogForTest() plog.Logs {
 	in := plog.NewLogs()
 	in.ResourceLogs().AppendEmpty()
 	in.ResourceLogs().At(0).ScopeLogs().AppendEmpty()
@@ -279,7 +279,7 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourcesetscopeunset",
 			input: func() plog.Logs {
-				log := GenerateLogForTest()
+				log := generateLogForTest()
 				log.ResourceLogs().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.0.0")
 				return log
 			},
@@ -289,7 +289,7 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourceunsetscopeset",
 			input: func() plog.Logs {
-				log := GenerateLogForTest()
+				log := generateLogForTest()
 				log.ResourceLogs().At(0).ScopeLogs().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.1.0")
 				return log
 			},
@@ -299,7 +299,7 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourcesetscopeset",
 			input: func() plog.Logs {
-				log := GenerateLogForTest()
+				log := generateLogForTest()
 				log.ResourceLogs().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.0.0")
 				log.ResourceLogs().At(0).ScopeLogs().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.1.0")
 
@@ -311,7 +311,7 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourceunsetscopeunset",
 			input: func() plog.Logs {
-				log := GenerateLogForTest()
+				log := generateLogForTest()
 				return log
 			},
 			//want: "https://example.com/testdata/testschemas/schemaprecedence/1.0.0",
@@ -355,7 +355,7 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 }
 
 // returns a test trace with no schema versions set
-func GenerateTraceForTest() ptrace.Traces {
+func generateTraceForTest() ptrace.Traces {
 	in := ptrace.NewTraces()
 	in.ResourceSpans().AppendEmpty()
 	in.ResourceSpans().At(0).ScopeSpans().AppendEmpty()
@@ -380,7 +380,7 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourcesetscopeunset",
 			input: func() ptrace.Traces {
-				trace := GenerateTraceForTest()
+				trace := generateTraceForTest()
 				trace.ResourceSpans().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.0.0")
 				return trace
 			},
@@ -390,7 +390,7 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourceunsetscopeset",
 			input: func() ptrace.Traces {
-				trace := GenerateTraceForTest()
+				trace := generateTraceForTest()
 				trace.ResourceSpans().At(0).ScopeSpans().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.1.0")
 				return trace
 			},
@@ -400,7 +400,7 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourcesetscopeset",
 			input: func() ptrace.Traces {
-				trace := GenerateTraceForTest()
+				trace := generateTraceForTest()
 				trace.ResourceSpans().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.0.0")
 				trace.ResourceSpans().At(0).ScopeSpans().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.1.0")
 
@@ -412,7 +412,7 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourceunsetscopeunset",
 			input: func() ptrace.Traces {
-				trace := GenerateTraceForTest()
+				trace := generateTraceForTest()
 				return trace
 			},
 			//want: "https://example.com/testdata/testschemas/schemaprecedence/1.0.0",
@@ -456,7 +456,7 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 }
 
 // returns a test metric with no schema versions set
-func GenerateMetricForTest() pmetric.Metrics {
+func generateMetricForTest() pmetric.Metrics {
 	in := pmetric.NewMetrics()
 	in.ResourceMetrics().AppendEmpty()
 	in.ResourceMetrics().At(0).ScopeMetrics().AppendEmpty()
@@ -480,7 +480,7 @@ func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourcesetscopeunset",
 			input: func() pmetric.Metrics {
-				metric := GenerateMetricForTest()
+				metric := generateMetricForTest()
 				metric.ResourceMetrics().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.0.0")
 				return metric
 			},
@@ -490,7 +490,7 @@ func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourceunsetscopeset",
 			input: func() pmetric.Metrics {
-				metric := GenerateMetricForTest()
+				metric := generateMetricForTest()
 				metric.ResourceMetrics().At(0).ScopeMetrics().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.1.0")
 				return metric
 			},
@@ -500,7 +500,7 @@ func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourcesetscopeset",
 			input: func() pmetric.Metrics {
-				metric := GenerateMetricForTest()
+				metric := generateMetricForTest()
 				metric.ResourceMetrics().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.0.0")
 				metric.ResourceMetrics().At(0).ScopeMetrics().At(0).SetSchemaUrl("https://example.com/testdata/testschemas/schemaprecedence/1.1.0")
 
@@ -512,7 +512,7 @@ func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
 		{
 			name: "resourceunsetscopeunset",
 			input: func() pmetric.Metrics {
-				metric := GenerateMetricForTest()
+				metric := generateMetricForTest()
 				return metric
 			},
 			//want: "https://example.com/testdata/testschemas/schemaprecedence/1.0.0",
