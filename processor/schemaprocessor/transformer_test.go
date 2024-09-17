@@ -338,7 +338,7 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 				return
 			}
 			targetLog := got.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0)
-			assert.Equal(t, targetLog.Attributes().Len(), 1)
+			assert.Equal(t, 1, targetLog.Attributes().Len())
 			_, usedResource := targetLog.Attributes().Get("one_one_zero_output")
 			_, usedScope := targetLog.Attributes().Get("one_two_zero_output")
 			_, usedNoop := targetLog.Attributes().Get("input")
@@ -439,7 +439,7 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 				return
 			}
 			targetTrace := got.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0)
-			assert.Equal(t, targetTrace.Attributes().Len(), 1)
+			assert.Equal(t, 1, targetTrace.Attributes().Len())
 			_, usedResource := targetTrace.Attributes().Get("one_one_zero_output")
 			_, usedScope := targetTrace.Attributes().Get("one_two_zero_output")
 			_, usedNoop := targetTrace.Attributes().Get("input")
@@ -539,7 +539,7 @@ func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
 				return
 			}
 			targetMetric := got.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Sum().DataPoints().At(0)
-			assert.Equal(t, targetMetric.Attributes().Len(), 1)
+			assert.Equal(t, 1, targetMetric.Attributes().Len())
 			_, usedResource := targetMetric.Attributes().Get("one_one_zero_output")
 			_, usedScope := targetMetric.Attributes().Get("one_two_zero_output")
 			_, usedNoop := targetMetric.Attributes().Get("input")
