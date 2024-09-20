@@ -59,3 +59,5 @@ processors:
 ```
 
 For more complete examples, please refer to [config.yml](./testdata/config.yml).
+
+There's a rough design/overview of the processor in the [DESIGN.md](./DESIGN.md) file.
