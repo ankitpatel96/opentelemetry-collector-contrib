@@ -134,18 +134,9 @@ linters-settings:
 
   testifylint:
     disable:
-      - compares
-      - empty
-      - error-is-as
-      - error-nil
-      - expected-actual
       - float-compare
-      - go-require
-      - negative-positive
-      - nil-compare
       - require-error
-      - suite-dont-use-pkg
-      - useless-assert
+      - suite-subtest-run
     enable-all: true
 
 linters:

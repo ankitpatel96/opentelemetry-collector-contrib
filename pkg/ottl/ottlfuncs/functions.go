@@ -37,6 +37,7 @@ func converters[K any]() []ottl.Factory[K] {
 	return []ottl.Factory[K]{
 		// Converters
 		NewBase64DecodeFactory[K](),
+		NewDecodeFactory[K](),
 		NewConcatFactory[K](),
 		NewConvertCaseFactory[K](),
 		NewDayFactory[K](),
@@ -45,6 +46,7 @@ func converters[K any]() []ottl.Factory[K] {
 		NewExtractPatternsFactory[K](),
 		NewExtractGrokPatternsFactory[K](),
 		NewFnvFactory[K](),
+		NewGetXMLFactory[K](),
 		NewHourFactory[K](),
 		NewHoursFactory[K](),
 		NewIntFactory[K](),
@@ -69,10 +71,12 @@ func converters[K any]() []ottl.Factory[K] {
 		NewParseJSONFactory[K](),
 		NewParseKeyValueFactory[K](),
 		NewParseXMLFactory[K](),
+		NewRemoveXMLFactory[K](),
 		NewSecondsFactory[K](),
 		NewSHA1Factory[K](),
 		NewSHA256Factory[K](),
 		NewSHA512Factory[K](),
+		NewSortFactory[K](),
 		NewSpanIDFactory[K](),
 		NewSplitFactory[K](),
 		NewFormatFactory[K](),
