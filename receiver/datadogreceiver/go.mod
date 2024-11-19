@@ -37,9 +37,9 @@ require (
 	github.com/DataDog/datadog-agent/pkg/util/log v0.59.0 // indirect
 	github.com/DataDog/datadog-agent/pkg/util/scrubber v0.59.0 // indirect
 	github.com/DataDog/datadog-go/v5 v5.5.0 // indirect
-	github.com/DataDog/go-sqllexer v0.0.15 // indirect
+	github.com/DataDog/go-sqllexer v0.0.16 // indirect
 	github.com/DataDog/go-tuf v1.1.0-0.5.2 // indirect
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.20.0 // indirect
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.21.0 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -107,7 +107,7 @@ require (
 	golang.org/x/oauth2 v0.22.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240822170219-fc7c04adadcd // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241007155032-5fefd90f89a9 // indirect
 	google.golang.org/grpc v1.67.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -130,3 +130,21 @@ replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden => 
 replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil => ../../pkg/pdatautil
 
 replace github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal => ../../internal/coreinternal
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics => /Users/ankit.patel/code/otel/opentelemetry-mapping-go/pkg/otlp/metrics
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => /Users/ankit.patel/code/otel/opentelemetry-mapping-go/pkg/otlp/attributes
+
+replace github.com/DataDog/datadog-agent/pkg/trace => /Users/ankit.patel/dd/datadog-agent/pkg/trace
+
+replace github.com/DataDog/datadog-agent/pkg/proto => /Users/ankit.patel/dd/datadog-agent/pkg/proto
+
+replace github.com/DataDog/datadog-agent/pkg/serializer => /Users/ankit.patel/dd/datadog-agent/pkg/serializer
+
+replace github.com/DataDog/datadog-agent/comp/forwarder/defaultforwarder => /Users/ankit.patel/dd/datadog-agent/comp/forwarder/defaultforwarder
+
+replace github.com/DataDog/datadog-agent/comp/forwarder/orchestrator/orchestratorinterface => /Users/ankit.patel/dd/datadog-agent/comp/forwarder/orchestrator/orchestratorinterface
+
+replace github.com/DataDog/datadog-agent/comp/otelcol/otlp/components/exporter/serializerexporter => /Users/ankit.patel/dd/datadog-agent/comp/otelcol/otlp/components/exporter/serializerexporter
+
+replace github.com/DataDog/datadog-agent/comp/serializer/compression => /Users/ankit.patel/dd/datadog-agent/comp/serializer/compression

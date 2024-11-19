@@ -504,3 +504,23 @@ replaces:
   - github.com/open-telemetry/opentelemetry-collector-contrib/pkg/status => ../../pkg/status
   - github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awss3receiver => ../../receiver/awss3receiver
   - github.com/DataDog/datadog-api-client-go/v2 => github.com/DataDog/datadog-api-client-go/v2 v2.31.0
+
+  - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics => /Users/ankit.patel/code/otel/opentelemetry-mapping-go/pkg/otlp/metrics
+
+  - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => /Users/ankit.patel/code/otel/opentelemetry-mapping-go/pkg/otlp/attributes
+
+  - github.com/DataDog/datadog-agent/pkg/trace => /Users/ankit.patel/dd/datadog-agent/pkg/trace
+
+  - github.com/DataDog/datadog-agent/pkg/proto => /Users/ankit.patel/dd/datadog-agent/pkg/proto
+
+  - github.com/DataDog/datadog-agent/pkg/serializer => /Users/ankit.patel/dd/datadog-agent/pkg/serializer
+
+  - github.com/DataDog/datadog-agent/comp/forwarder/defaultforwarder => /Users/ankit.patel/dd/datadog-agent/comp/forwarder/defaultforwarder
+
+  - github.com/DataDog/datadog-agent/comp/forwarder/orchestrator/orchestratorinterface => /Users/ankit.patel/dd/datadog-agent/comp/forwarder/orchestrator/orchestratorinterface
+
+  - github.com/DataDog/datadog-agent/comp/otelcol/otlp/components/exporter/serializerexporter => /Users/ankit.patel/dd/datadog-agent/comp/otelcol/otlp/components/exporter/serializerexporter
+
+  - github.com/DataDog/datadog-agent/comp/serializer/compression => /Users/ankit.patel/dd/datadog-agent/comp/serializer/compression
+  - github.com/DataDog/datadog-agent/pkg/metrics => /Users/ankit.patel/dd/datadog-agent/pkg/metrics
+  - github.com/DataDog/datadog-agent/pkg/config/utils => /Users/ankit.patel/dd/datadog-agent/pkg/config/utils

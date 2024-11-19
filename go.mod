@@ -31,3 +31,21 @@ exclude github.com/DataDog/agent-payload/v5 v5.0.59
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics => /Users/ankit.patel/code/otel/opentelemetry-mapping-go/pkg/otlp/metrics
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => /Users/ankit.patel/code/otel/opentelemetry-mapping-go/pkg/otlp/attributes
+
+replace github.com/DataDog/datadog-agent/pkg/trace => /Users/ankit.patel/dd/datadog-agent/pkg/trace
+
+replace github.com/DataDog/datadog-agent/pkg/proto => /Users/ankit.patel/dd/datadog-agent/pkg/proto
+
+replace github.com/DataDog/datadog-agent/pkg/serializer => /Users/ankit.patel/dd/datadog-agent/pkg/serializer
+
+replace github.com/DataDog/datadog-agent/comp/forwarder/defaultforwarder => /Users/ankit.patel/dd/datadog-agent/comp/forwarder/defaultforwarder
+
+replace github.com/DataDog/datadog-agent/comp/forwarder/orchestrator/orchestratorinterface => /Users/ankit.patel/dd/datadog-agent/comp/forwarder/orchestrator/orchestratorinterface
+
+replace github.com/DataDog/datadog-agent/comp/otelcol/otlp/components/exporter/serializerexporter => /Users/ankit.patel/dd/datadog-agent/comp/otelcol/otlp/components/exporter/serializerexporter
+
+replace github.com/DataDog/datadog-agent/comp/serializer/compression => /Users/ankit.patel/dd/datadog-agent/comp/serializer/compression
