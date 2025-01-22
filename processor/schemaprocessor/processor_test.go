@@ -28,7 +28,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/schemaprocessor/internal/translation"
 )
 
-func newTestTransformer(t *testing.T) *schemaprocessor {
+func newTestProcessor(t *testing.T) *schemaprocessor {
 	trans, err := newSchemaProcessor(context.Background(), newDefaultConfiguration(), processor.Settings{
 		TelemetrySettings: component.TelemetrySettings{
 			Logger:        zaptest.NewLogger(t),
@@ -39,10 +39,10 @@ func newTestTransformer(t *testing.T) *schemaprocessor {
 	return trans
 }
 
-func TestTransformerStart(t *testing.T) {
+func TestProcessorStart(t *testing.T) {
 	t.Parallel()
 
-	trans := newTestTransformer(t)
+	trans := newTestProcessor(t)
 	assert.NoError(t, trans.start(context.Background(), componenttest.NewNopHost()))
 }
 
@@ -85,23 +85,23 @@ func pmetricsFromJSON(t *testing.T, path string) pmetric.Metrics {
 	return inSignals
 }
 
-func buildTestTransformer(t *testing.T, targetURL string) *schemaprocessor {
+func buildTestProcessor(t *testing.T, targetURL string) *schemaprocessor {
 	t.Helper()
 	defaultConfig := newDefaultConfiguration()
 	castedConfig := defaultConfig.(*Config)
 	castedConfig.Targets = []string{targetURL}
-	transform, err := newSchemaProcessor(context.Background(), castedConfig, processor.Settings{
+	processor, err := newSchemaProcessor(context.Background(), castedConfig, processor.Settings{
 		TelemetrySettings: component.TelemetrySettings{
 			Logger: zaptest.NewLogger(t),
 		},
 	})
 	require.NoError(t, err, "Must not error when creating schemaprocessor")
-	err = transform.manager.SetProviders(translation.NewTestProvider(&f))
+	err = processor.manager.SetProviders(translation.NewTestProvider(&f))
 	require.NoError(t, err)
-	return transform
+	return processor
 }
 
-func TestTransformerSchemaBySections(t *testing.T) {
+func TestProcessorSchemaBySections(t *testing.T) {
 	tests := []struct {
 		name     string
 		section  string
@@ -152,8 +152,8 @@ func TestTransformerSchemaBySections(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			transformerTarget := fmt.Sprintf("https://example.com/testdata/schema_sections/%s/1.0.0", tc.section)
-			transform := buildTestTransformer(t, transformerTarget)
+			processorTarget := fmt.Sprintf("https://example.com/testdata/schema_sections/%s/1.0.0", tc.section)
+			processor := buildTestProcessor(t, processorTarget)
 			inDataPath := fmt.Sprintf("testdata/schema_sections/%s/%s_in.json", tc.section, tc.dataType)
 			outDataPath := fmt.Sprintf("testdata/schema_sections/%s/%s_out.json", tc.section, tc.dataType)
 			switch tc.dataType {
@@ -161,21 +161,21 @@ func TestTransformerSchemaBySections(t *testing.T) {
 				inLogs := plogsFromJSON(t, inDataPath)
 				expected := plogsFromJSON(t, outDataPath)
 
-				logs, err := transform.processLogs(context.Background(), inLogs)
+				logs, err := processor.processLogs(context.Background(), inLogs)
 				require.NoError(t, err)
 				require.NoError(t, plogtest.CompareLogs(expected, logs), "Must match the expected values")
 			case pipeline.SignalMetrics:
 				inMetrics := pmetricsFromJSON(t, inDataPath)
 				expected := pmetricsFromJSON(t, outDataPath)
 
-				metrics, err := transform.processMetrics(context.Background(), inMetrics)
+				metrics, err := processor.processMetrics(context.Background(), inMetrics)
 				require.NoError(t, err)
 				require.NoError(t, pmetrictest.CompareMetrics(expected, metrics), "Must match the expected values")
 			case pipeline.SignalTraces:
 				inTraces := ptracesFromJSON(t, inDataPath)
 				expected := ptracesFromJSON(t, outDataPath)
 
-				traces, err := transform.processTraces(context.Background(), inTraces)
+				traces, err := processor.processTraces(context.Background(), inTraces)
 				require.NoError(t, err)
 				require.NoError(t, ptracetest.CompareTraces(expected, traces), "Must match the expected values")
 			default:
@@ -186,10 +186,10 @@ func TestTransformerSchemaBySections(t *testing.T) {
 	}
 }
 
-func TestTransformerProcessing(t *testing.T) {
+func TestProcessorProcessing(t *testing.T) {
 	t.Parallel()
 
-	trans := newTestTransformer(t)
+	trans := newTestProcessor(t)
 	t.Run("metrics", func(t *testing.T) {
 		in := pmetric.NewMetrics()
 		in.ResourceMetrics().AppendEmpty()
@@ -263,7 +263,7 @@ var testdataFiles embed.FS
 // case 2: resource schema not set, scope schema set, use scope schema inside
 // case 3: resource schema set, scope schema set, use scope schema
 // case 4: resource schema not set, scope schema not set, noop translation
-func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
+func TestProcessorScopeLogSchemaPrecedence(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name            string
@@ -319,16 +319,16 @@ func TestTransformerScopeLogSchemaPrecedence(t *testing.T) {
 			defaultConfig := newDefaultConfiguration()
 			castedConfig := defaultConfig.(*Config)
 			castedConfig.Targets = []string{"https://example.com/testdata/testschemas/schemaprecedence/1.2.0"}
-			transform, err := newSchemaProcessor(context.Background(), defaultConfig, processor.Settings{
+			processor, err := newSchemaProcessor(context.Background(), defaultConfig, processor.Settings{
 				TelemetrySettings: component.TelemetrySettings{
 					Logger: zaptest.NewLogger(t),
 				},
 			})
 			require.NoError(t, err, "Must not error when creating schemaprocessor")
 
-			err = transform.manager.SetProviders(translation.NewTestProvider(&testdataFiles))
+			err = processor.manager.SetProviders(translation.NewTestProvider(&testdataFiles))
 			require.NoError(t, err)
-			got, err := transform.processLogs(context.Background(), tt.input())
+			got, err := processor.processLogs(context.Background(), tt.input())
 			if !tt.wantErr(t, err, fmt.Sprintf("processLogs(%v)", tt.input())) {
 				return
 			}
@@ -364,7 +364,7 @@ func generateTraceForTest() ptrace.Traces {
 // case 2: resource schema not set, scope schema set, use scope schema inside
 // case 3: resource schema set, scope schema set, use scope schema
 // case 4: resource schema not set, scope schema not set, noop translation
-func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
+func TestProcessorScopeTraceSchemaPrecedence(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name            string
@@ -420,16 +420,16 @@ func TestTransformerScopeTraceSchemaPrecedence(t *testing.T) {
 			defaultConfig := newDefaultConfiguration()
 			castedConfig := defaultConfig.(*Config)
 			castedConfig.Targets = []string{"https://example.com/testdata/testschemas/schemaprecedence/1.2.0"}
-			transform, err := newSchemaProcessor(context.Background(), defaultConfig, processor.Settings{
+			processor, err := newSchemaProcessor(context.Background(), defaultConfig, processor.Settings{
 				TelemetrySettings: component.TelemetrySettings{
 					Logger: zaptest.NewLogger(t),
 				},
 			})
 			require.NoError(t, err, "Must not error when creating schemaprocessor")
 
-			err = transform.manager.SetProviders(translation.NewTestProvider(&testdataFiles))
+			err = processor.manager.SetProviders(translation.NewTestProvider(&testdataFiles))
 			require.NoError(t, err)
-			got, err := transform.processTraces(context.Background(), tt.input())
+			got, err := processor.processTraces(context.Background(), tt.input())
 			if !tt.wantErr(t, err, fmt.Sprintf("processTraces(%v)", tt.input())) {
 				return
 			}
@@ -464,7 +464,7 @@ func generateMetricForTest() pmetric.Metrics {
 // case 2: resource schema not set, scope schema set, use scope schema inside
 // case 3: resource schema set, scope schema set, use scope schema
 // case 4: resource schema not set, scope schema not set, noop translation
-func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
+func TestProcessorScopeMetricSchemaPrecedence(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name            string
@@ -520,16 +520,16 @@ func TestTransformerScopeMetricSchemaPrecedence(t *testing.T) {
 			defaultConfig := newDefaultConfiguration()
 			castedConfig := defaultConfig.(*Config)
 			castedConfig.Targets = []string{"https://example.com/testdata/testschemas/schemaprecedence/1.2.0"}
-			transform, err := newSchemaProcessor(context.Background(), defaultConfig, processor.Settings{
+			processor, err := newSchemaProcessor(context.Background(), defaultConfig, processor.Settings{
 				TelemetrySettings: component.TelemetrySettings{
 					Logger: zaptest.NewLogger(t),
 				},
 			})
 			require.NoError(t, err, "Must not error when creating schemaprocessor")
 
-			err = transform.manager.SetProviders(translation.NewTestProvider(&testdataFiles))
+			err = processor.manager.SetProviders(translation.NewTestProvider(&testdataFiles))
 			require.NoError(t, err)
-			got, err := transform.processMetrics(context.Background(), tt.input())
+			got, err := processor.processMetrics(context.Background(), tt.input())
 			if !tt.wantErr(t, err, fmt.Sprintf("processMetrics(%v)", tt.input())) {
 				return
 			}
